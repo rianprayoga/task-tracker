@@ -1,16 +1,15 @@
 package org.example;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.model.Data;
 
 import java.io.File;
 import java.io.IOException;
 
 public class FileManager {
     private final String PATHNAME = "data.json";
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Data open(){
         File file = new File(PATHNAME);

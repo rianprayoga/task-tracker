@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.model.Data;
+
 import java.util.Scanner;
 
 
