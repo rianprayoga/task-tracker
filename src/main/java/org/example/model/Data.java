@@ -41,7 +41,7 @@ public class Data {
     public void updateDescription(int id, String description) throws TaskNotFoundException{
         Task task = this.findTask(id);
         task.setDescription(description);
-        // TODO adjust updatedAt
+        task.setUpdatedAt(Date.from(Instant.now()));
     }
 
     public void deleteTask(int id) throws TaskNotFoundException{
@@ -49,7 +49,7 @@ public class Data {
         this.tasks.remove(task);
     }
 
-    private Task findTask(int id) throws TaskNotFoundException{
+    private Task findTask(int id) throws TaskNotFoundException {
         return this.tasks.stream().filter(value -> value.getId() == id).findAny()
                 .orElseThrow(() -> new TaskNotFoundException("Task with id %s not found.".formatted(id)));
     }
@@ -57,7 +57,6 @@ public class Data {
     public void changeTaskStatus(int id, TaskStatus status) throws TaskNotFoundException {
         Task task = this.findTask(id);
         task.setStatus(status);
-
-        // TODO adjust updatedAt
+        task.setUpdatedAt(Date.from(Instant.now()));
     }
 }
