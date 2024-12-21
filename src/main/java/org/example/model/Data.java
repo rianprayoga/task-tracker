@@ -3,7 +3,9 @@ package org.example.model;
 import org.example.TaskStatus;
 import org.example.exception.TaskNotFoundException;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.example.TaskStatus.TODO;
@@ -13,7 +15,7 @@ public class Data {
     private int latestId;
     private List<Task> tasks;
 
-    public Data(int latestId) {
+    private Data(int latestId) {
         this.latestId = latestId;
         this.tasks = new ArrayList<>();
     }
@@ -24,8 +26,8 @@ public class Data {
 
     public void addTask(String description){
         latestId += 1;
-        // TODO add date
-        this.tasks.add(new Task(latestId, description, TODO, null, null));
+        Date now = Date.from(Instant.now());
+        this.tasks.add(new Task(latestId, description, TODO, now, now));
     }
 
     public List<Task> findTasksByStatus(TaskStatus status){
