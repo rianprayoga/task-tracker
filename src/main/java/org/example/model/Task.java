@@ -2,6 +2,8 @@ package org.example.model;
 
 import org.example.TaskStatus;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Task {
@@ -10,6 +12,9 @@ public class Task {
     private TaskStatus status;
     private Date createdAt;
     private Date updatedAt;
+
+    //for deserialization (json -> POJO)
+    public Task(){}
 
     public Task(int id, String description, TaskStatus status, Date createdAt, Date updatedAt) {
         this.id = id;
@@ -21,10 +26,6 @@ public class Task {
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getDescription() {
@@ -47,15 +48,24 @@ public class Task {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Date getUpdatedAt() {
         return updatedAt;
     }
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+        return "Task{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", status=" + status.getValue() +
+                ", createdAt=" + createdAt.toInstant().atOffset(ZoneOffset.UTC).format(formatter) +
+                ", updatedAt=" + updatedAt.toInstant().atOffset(ZoneOffset.UTC).format(formatter) +
+                '}';
     }
 }

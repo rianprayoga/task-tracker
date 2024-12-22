@@ -8,9 +8,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.example.TaskStatus.TODO;
-import static org.example.TaskStatus.IN_PROGRESS;
 import static org.example.TaskStatus.DONE;
+import static org.example.TaskStatus.IN_PROGRESS;
+import static org.example.TaskStatus.TODO;
 
 public class DataTest {
 
@@ -124,7 +124,7 @@ public class DataTest {
     }
 
     @Test
-    public void deleteTask_throwNotFoundException() throws TaskNotFoundException {
+    public void deleteTask_throwNotFoundException() {
         Data actual = Data.empty();
         actual.addTask(DO_HOMEWORK);
         actual.addTask(MAKE_BREAKFAST);

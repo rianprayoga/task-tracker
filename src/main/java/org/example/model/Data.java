@@ -1,5 +1,6 @@
 package org.example.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.example.TaskStatus;
 import org.example.exception.TaskNotFoundException;
 
@@ -10,8 +11,8 @@ import java.util.List;
 
 import static org.example.TaskStatus.TODO;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Data {
-
     private int latestId;
     private List<Task> tasks;
 
@@ -19,6 +20,9 @@ public class Data {
         this.latestId = latestId;
         this.tasks = new ArrayList<>();
     }
+
+    //for deserialization (json -> POJO)
+    public Data(){}
 
     public static Data empty(){
         return new Data(0);

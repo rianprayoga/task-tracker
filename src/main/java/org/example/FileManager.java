@@ -19,8 +19,7 @@ public class FileManager {
             }
 
             JsonParser parser = objectMapper.createParser(file);
-            String text = parser.getText();
-            if (text == null){
+            if (parser.nextToken() == null){
                 return Data.empty();
             }
 
