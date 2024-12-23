@@ -28,6 +28,10 @@ public class Data {
         return new Data(0);
     }
 
+    public int getLatestId(){
+        return this.latestId;
+    }
+
     public void addTask(String description){
         latestId += 1;
         Date now = Date.from(Instant.now());
