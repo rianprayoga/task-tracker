@@ -7,7 +7,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        CommandProcessor processor = new CommandProcessor();
+        DataRepository dataRepository = new DataRepository();
+        CommandProcessor processor = new CommandProcessor(dataRepository);
 
         //\s*task-cli\s*add\s*\".+\"
         //\s*task-cli\s*list\s*(done|todo|progress)?

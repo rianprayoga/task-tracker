@@ -7,11 +7,29 @@ import org.example.model.Data;
 import java.io.File;
 import java.io.IOException;
 
-public class FileManager {
+public class DataRepository {
     private final String PATHNAME = "data.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Data data;
 
-    public Data open(){
+    public DataRepository() {
+        this.data = this.open();
+    }
+
+    public void add(String description){
+        data.addTask(description);
+        save(data);
+        System.out.printf("Task added successfully (ID: %s)%n", data.getLatestId());
+    }
+
+    public void findAll(){
+        data.findAll().forEach(task -> System.out.println(task.toString()));
+    }
+    public void findBy(TaskStatus status){
+        data.findTasksByStatus(status).forEach(task -> System.out.println(task.toString()));
+    }
+
+    private Data open(){
         File file = new File(PATHNAME);
         try {
             if (!file.exists()) {
@@ -29,7 +47,7 @@ public class FileManager {
         }
     }
 
-    public void save(Data data){
+    private void save(Data data){
         try {
             objectMapper.writeValue(new File(PATHNAME), data);
         } catch (IOException e) {

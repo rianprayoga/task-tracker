@@ -3,9 +3,13 @@ package org.example;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TaskStatus {
-    TODO("todo"), IN_PROGRESS("in-progress"), DONE("done");
+    TODO("todo"),
+    IN_PROGRESS("in-progress"),
+    DONE("done"),
+    ALL("all");
 
-    private String value;
+    private final String value;
+
     TaskStatus(String value){
         this.value = value;
     }
@@ -13,5 +17,14 @@ public enum TaskStatus {
     @JsonValue
     public String getValue() {
         return value;
+    }
+
+    public static TaskStatus fromString(String input) {
+        for (TaskStatus status : TaskStatus.values()) {
+            if (status.getValue().equals(input)) {
+                return status;
+            }
+        }
+        return ALL;
     }
 }

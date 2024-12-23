@@ -1,13 +1,13 @@
 package org.example;
 
 public enum Command {
-    ADD("add", "\\s*add\\s*"),
-    UPDATE("update", "\\s*update\\s*"),
-    DELETE("delete", "\\s*delete\\s*"),
-    LIST("list", "\\s*list\\s*"),
-    MARK_IN_PROGRESS("mark-in-progress", "\\s*mark-in-progress\\s*"),
-    MARK_DONE("mark-done", "\\s*mark-done\\s*"),
-    HELP("help","\\s*help\\s*");
+    ADD("add", "add\\s*"),
+    UPDATE("update", "update\\s*"),
+    DELETE("delete", "delete\\s*"),
+    LIST("list", "list\\s*"),
+    MARK_IN_PROGRESS("mark-in-progress", "mark-in-progress\\s*"),
+    MARK_DONE("mark-done", "mark-done\\s*"),
+    HELP("help","help\\s*");
 
     private final String value;
     private final String regex;

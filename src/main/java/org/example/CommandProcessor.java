@@ -1,9 +1,6 @@
 package org.example;
 
-import org.example.model.Data;
-
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,24 +14,14 @@ import static org.example.Command.UPDATE;
 
 public class CommandProcessor {
 
-    private final FileManager fileManager;
-    private final Data data;
+    private final DataRepository dataRepository;
     private final String TASK_CLI_REGEX = "\\s*task-cli\\s*";
     private final String QUOTED_TEXT_REGEX = "\\s*\"(?<value>.+)\"\\s*";
-    private final String LIST_OPTIONS_REGEX = "\\s*(?<option>done|todo|in-progress)?\\s*";
+    private final String NUMBER_REGEX = "\\s*(?<id>[1-9]+\\d*)\\s*";
+    private final String TASK_STATUS_REGEX = "\\s*(?<option>done|todo|in-progress)?\\s*";
 
-    public CommandProcessor(){
-        this.fileManager = new FileManager();
-        this.data = fileManager.open();
-    }
-
-    private boolean isTaskCli(Scanner scanner){
-        try{
-            scanner.next("^\\s*task-cli\\s*");
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+    public CommandProcessor(DataRepository dataRepository){
+        this.dataRepository = dataRepository;
     }
 
     private boolean isTaskCli(String inputString){
@@ -58,23 +45,20 @@ public class CommandProcessor {
         }
     }
 
-    private Command getCommand(String inputString) {
+    private Command getCommand(String input) {
         return Arrays.stream(Command.values())
-                .filter(command -> Pattern.matches(TASK_CLI_REGEX + command.getRegex() + ".+", inputString))
+                .filter(command -> Pattern.matches(TASK_CLI_REGEX + command.getRegex() + ".*", input))
                 .findAny()
                 .orElse(HELP);
     }
 
-    private void add(String inputString){
-        String s = TASK_CLI_REGEX + ADD.getRegex() + QUOTED_TEXT_REGEX;
-        Pattern compile = Pattern.compile(s);
-        Matcher matcher = compile.matcher(inputString);
+    private void add(String input){
+        Pattern compile = Pattern.compile(TASK_CLI_REGEX + ADD.getRegex() + QUOTED_TEXT_REGEX);
+        Matcher matcher = compile.matcher(input);
 
         if (matcher.find()) {
             String description = matcher.group("value");
-            data.addTask(description);
-            fileManager.save(data);
-            System.out.printf("Task added successfully (ID: %s)%n", data.getLatestId());
+            dataRepository.add(description);
             return;
         }
 
@@ -85,18 +69,17 @@ public class CommandProcessor {
                     """);
     }
 
-    private void list(String inputString){
-        String s = TASK_CLI_REGEX + LIST.getRegex() + LIST_OPTIONS_REGEX;
+    private void list(String input){
+        String s = TASK_CLI_REGEX + LIST.getRegex() + TASK_STATUS_REGEX;
         Pattern compile = Pattern.compile(s);
-        Matcher matcher = compile.matcher(inputString);
+        Matcher matcher = compile.matcher(input);
 
         if (matcher.matches()){
             String status = matcher.group("option");
             if (null == status) {
-                data.findAll().forEach(task -> System.out.println(task.toString()));
+                dataRepository.findAll();
             } else {
-                data.findTasksByStatus(TaskStatus.fromString(status))
-                        .forEach(task -> System.out.println(task.toString()));
+                dataRepository.findBy(TaskStatus.fromString(status));
             }
             return;
         }
@@ -104,7 +87,16 @@ public class CommandProcessor {
         System.out.print(
                 """
                     usage: task-cli list option
-                    task-cli: error: Options are optional, available values for option are done, todo or in-progress
+                    task-cli: error: Option is optional, available values for option are done, todo or in-progress
                     """);
+    }
+
+    private void markProgress(String input){
+        Pattern compile = Pattern.compile(TASK_CLI_REGEX + MARK_IN_PROGRESS + NUMBER_REGEX);
+        Matcher matcher = compile.matcher(input);
+
+        if (matcher.matches()){
+            String group = matcher.group("id");
+        }
     }
 }
