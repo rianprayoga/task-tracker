@@ -37,7 +37,7 @@ public class CommandProcessor {
             switch (getCommand(inputString)) {
                 case ADD -> add(inputString);
                 case UPDATE -> System.out.println(UPDATE.getValue());
-                case DELETE -> System.out.println(DELETE.getValue());
+                case DELETE -> delete(inputString);
                 case LIST -> list(inputString);
                 case MARK_DONE -> markDone(inputString);
                 case MARK_IN_PROGRESS -> markProgress(inputString);
@@ -118,6 +118,20 @@ public class CommandProcessor {
             String id = matcher.group("id");
             try {
                 dataRepository.mark(Integer.parseInt(id),DONE);
+            } catch (TaskNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void delete(String input){
+        Pattern compile = Pattern.compile(TASK_CLI_REGEX + DELETE.getRegex() + NUMBER_REGEX);
+        Matcher matcher = compile.matcher(input);
+
+        if (matcher.matches()){
+            String id = matcher.group("id");
+            try {
+                dataRepository.delete(Integer.parseInt(id));
             } catch (TaskNotFoundException e) {
                 System.out.println(e.getMessage());
             }

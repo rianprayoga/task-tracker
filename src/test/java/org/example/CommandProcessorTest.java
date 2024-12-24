@@ -169,4 +169,34 @@ public class CommandProcessorTest{
         commandProcessor.process("task-cli mark-done 012334123");
         verifyNoInteractions(dataRepository);
     }
+
+    @Test
+    public void delete() throws TaskNotFoundException {
+        commandProcessor.process("task-cli delete 21344123");
+        verify(dataRepository, times(1)).delete(21344123);
+    }
+
+    @Test
+    public void delete_withExtraSpace() throws TaskNotFoundException {
+        commandProcessor.process("task-cli   delete  21344123   ");
+        verify(dataRepository, times(1)).delete(21344123);
+    }
+
+    @Test
+    public void delete_missingId()  {
+        commandProcessor.process("task-cli delete");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void delete_wrongOrder(){
+        commandProcessor.process("task-cli 1 delete");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void delete_idStartWithZero(){
+        commandProcessor.process("task-cli delete 0123141 ");
+        verifyNoInteractions(dataRepository);
+    }
 }

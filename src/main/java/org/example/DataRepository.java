@@ -35,6 +35,10 @@ public class DataRepository {
         data.changeTaskStatus(id, status);
     }
 
+    public void delete(int id) throws TaskNotFoundException {
+        data.deleteTask(id);
+    }
+
     private Data open(){
         File file = new File(PATHNAME);
         try {
