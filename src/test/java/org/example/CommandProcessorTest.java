@@ -199,4 +199,35 @@ public class CommandProcessorTest{
         commandProcessor.process("task-cli delete 0123141 ");
         verifyNoInteractions(dataRepository);
     }
+
+    @Test
+    public void delete_idIsString(){
+        commandProcessor.process("task-cli delete \"231412332\" ");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void update() throws TaskNotFoundException {
+        commandProcessor.process("task-cli update 101 \"new value\" ");
+        verify(dataRepository).update(101, "new value");
+    }
+
+    @Test
+    public void update_idStartWithZero(){
+        commandProcessor.process("task-cli update 011 \"new value\" ");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void update_wrongOrder(){
+        commandProcessor.process("task-cli 11  \"new value\" update ");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void update_idString(){
+        commandProcessor.process("task-cli update ten \"new value\" ");
+        verifyNoInteractions(dataRepository);
+    }
+
 }

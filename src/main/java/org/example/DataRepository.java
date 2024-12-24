@@ -33,10 +33,17 @@ public class DataRepository {
 
     public void mark(int id, TaskStatus status) throws TaskNotFoundException {
         data.changeTaskStatus(id, status);
+        save(data);
     }
 
     public void delete(int id) throws TaskNotFoundException {
         data.deleteTask(id);
+        save(data);
+    }
+
+    public void update(int id, String desc) throws TaskNotFoundException {
+        data.updateDescription(id, desc);
+        save(data);
     }
 
     private Data open(){

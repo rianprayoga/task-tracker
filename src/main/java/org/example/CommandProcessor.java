@@ -19,24 +19,26 @@ import static org.example.TaskStatus.IN_PROGRESS;
 public class CommandProcessor {
 
     private final DataRepository dataRepository;
-    private final String TASK_CLI_REGEX = "\\s*task-cli\\s*";
-    private final String QUOTED_TEXT_REGEX = "\\s*\"(?<value>.+)\"\\s*$";
-    private final String NUMBER_REGEX = "\\s*(?<id>[1-9]+\\d*)\\s*$";
-    private final String TASK_STATUS_REGEX = "\\s*(?<option>done|todo|in-progress)?\\s*$";
+    private final String TASK_CLI_REGEX = "\\s*task-cli";
+    private final String QUOTED_TEXT_REGEX = "\"(?<value>.+)\"";
+    private final String NUMBER_REGEX = "(?<id>[1-9]+\\d*)";
+    private final String TASK_STATUS_REGEX = "(?<option>done|todo|in-progress)?";
+    private final String END_REGEX = "$";
+    private final String INFINITE_SPACE = "\\s*";
 
     public CommandProcessor(DataRepository dataRepository){
         this.dataRepository = dataRepository;
     }
 
     private boolean isTaskCli(String inputString){
-        return Pattern.matches(TASK_CLI_REGEX+".*", inputString);
+        return Pattern.matches( construct(TASK_CLI_REGEX,".*"), inputString);
     }
 
     public void process(String inputString) {
         if (isTaskCli(inputString)) {
             switch (getCommand(inputString)) {
                 case ADD -> add(inputString);
-                case UPDATE -> System.out.println(UPDATE.getValue());
+                case UPDATE -> update(inputString);
                 case DELETE -> delete(inputString);
                 case LIST -> list(inputString);
                 case MARK_DONE -> markDone(inputString);
@@ -52,13 +54,13 @@ public class CommandProcessor {
 
     private Command getCommand(String input) {
         return Arrays.stream(Command.values())
-                .filter(command -> Pattern.matches(TASK_CLI_REGEX + command.getRegex() + ".*", input))
+                .filter(command -> Pattern.matches(construct(TASK_CLI_REGEX, command.getRegex(), ".*"), input))
                 .findAny()
                 .orElse(HELP);
     }
 
     private void add(String input){
-        Pattern compile = Pattern.compile(TASK_CLI_REGEX + ADD.getRegex() + QUOTED_TEXT_REGEX);
+        Pattern compile = Pattern.compile(construct(TASK_CLI_REGEX, ADD.getRegex(), QUOTED_TEXT_REGEX));
         Matcher matcher = compile.matcher(input);
 
         if (matcher.find()) {
@@ -75,8 +77,7 @@ public class CommandProcessor {
     }
 
     private void list(String input){
-        String s = TASK_CLI_REGEX + LIST.getRegex() + TASK_STATUS_REGEX;
-        Pattern compile = Pattern.compile(s);
+        Pattern compile = Pattern.compile(construct(TASK_CLI_REGEX, LIST.getRegex(), TASK_STATUS_REGEX));
         Matcher matcher = compile.matcher(input);
 
         if (matcher.matches()){
@@ -97,7 +98,7 @@ public class CommandProcessor {
     }
 
     private void markProgress(String input){
-        Pattern compile = Pattern.compile(TASK_CLI_REGEX + MARK_IN_PROGRESS.getRegex() + NUMBER_REGEX);
+        Pattern compile = Pattern.compile(construct(TASK_CLI_REGEX,MARK_IN_PROGRESS.getRegex(),NUMBER_REGEX));
         Matcher matcher = compile.matcher(input);
 
         if (matcher.matches()){
@@ -111,7 +112,7 @@ public class CommandProcessor {
     }
 
     private void markDone(String input){
-        Pattern compile = Pattern.compile(TASK_CLI_REGEX + MARK_DONE.getRegex() + NUMBER_REGEX);
+        Pattern compile = Pattern.compile(construct(TASK_CLI_REGEX,MARK_DONE.getRegex(),NUMBER_REGEX));
         Matcher matcher = compile.matcher(input);
 
         if (matcher.matches()){
@@ -125,7 +126,7 @@ public class CommandProcessor {
     }
 
     private void delete(String input){
-        Pattern compile = Pattern.compile(TASK_CLI_REGEX + DELETE.getRegex() + NUMBER_REGEX);
+        Pattern compile = Pattern.compile(construct(TASK_CLI_REGEX,DELETE.getRegex(),NUMBER_REGEX));
         Matcher matcher = compile.matcher(input);
 
         if (matcher.matches()){
@@ -136,5 +137,33 @@ public class CommandProcessor {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    private void update(String input){
+        Pattern compile = Pattern.compile(
+                construct(TASK_CLI_REGEX, UPDATE.getRegex(), NUMBER_REGEX, QUOTED_TEXT_REGEX));
+        Matcher matcher = compile.matcher(input);
+
+        if (matcher.matches()){
+            String id = matcher.group("id");
+            String desc = matcher.group("value");
+
+            try {
+                dataRepository.update(Integer.parseInt(id), desc);
+            } catch (TaskNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
+    }
+
+    private String construct(String...regex){
+        StringBuilder builder = new StringBuilder();
+        Arrays.stream(regex).forEach(string -> {
+            builder.append(string);
+            builder.append(INFINITE_SPACE);
+        });
+        builder.append(END_REGEX);
+        return builder.toString();
     }
 }
