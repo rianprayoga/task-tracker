@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.exception.TaskNotFoundException;
+
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,14 +13,16 @@ import static org.example.Command.LIST;
 import static org.example.Command.MARK_DONE;
 import static org.example.Command.MARK_IN_PROGRESS;
 import static org.example.Command.UPDATE;
+import static org.example.TaskStatus.DONE;
+import static org.example.TaskStatus.IN_PROGRESS;
 
 public class CommandProcessor {
 
     private final DataRepository dataRepository;
     private final String TASK_CLI_REGEX = "\\s*task-cli\\s*";
-    private final String QUOTED_TEXT_REGEX = "\\s*\"(?<value>.+)\"\\s*";
-    private final String NUMBER_REGEX = "\\s*(?<id>[1-9]+\\d*)\\s*";
-    private final String TASK_STATUS_REGEX = "\\s*(?<option>done|todo|in-progress)?\\s*";
+    private final String QUOTED_TEXT_REGEX = "\\s*\"(?<value>.+)\"\\s*$";
+    private final String NUMBER_REGEX = "\\s*(?<id>[1-9]+\\d*)\\s*$";
+    private final String TASK_STATUS_REGEX = "\\s*(?<option>done|todo|in-progress)?\\s*$";
 
     public CommandProcessor(DataRepository dataRepository){
         this.dataRepository = dataRepository;
@@ -28,16 +32,17 @@ public class CommandProcessor {
         return Pattern.matches(TASK_CLI_REGEX+".*", inputString);
     }
 
-    public void process(String inputString){
-        if (isTaskCli(inputString)){
-            switch (getCommand(inputString)){
+    public void process(String inputString) {
+        if (isTaskCli(inputString)) {
+            switch (getCommand(inputString)) {
                 case ADD -> add(inputString);
                 case UPDATE -> System.out.println(UPDATE.getValue());
                 case DELETE -> System.out.println(DELETE.getValue());
-                case LIST ->list(inputString);
-                case MARK_DONE -> System.out.println(MARK_DONE.getValue());
-                case MARK_IN_PROGRESS -> System.out.println(MARK_IN_PROGRESS.getValue());
-                default -> System.out.print("""
+                case LIST -> list(inputString);
+                case MARK_DONE -> markDone(inputString);
+                case MARK_IN_PROGRESS -> markProgress(inputString);
+                default -> System.out.print(
+                        """
                 usage: task-cli add "description"
                 task-cli: error: the following arguments are required: description
                 """);
@@ -92,11 +97,30 @@ public class CommandProcessor {
     }
 
     private void markProgress(String input){
-        Pattern compile = Pattern.compile(TASK_CLI_REGEX + MARK_IN_PROGRESS + NUMBER_REGEX);
+        Pattern compile = Pattern.compile(TASK_CLI_REGEX + MARK_IN_PROGRESS.getRegex() + NUMBER_REGEX);
         Matcher matcher = compile.matcher(input);
 
         if (matcher.matches()){
-            String group = matcher.group("id");
+            String id = matcher.group("id");
+            try {
+                dataRepository.mark(Integer.parseInt(id),IN_PROGRESS);
+            } catch (TaskNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void markDone(String input){
+        Pattern compile = Pattern.compile(TASK_CLI_REGEX + MARK_DONE.getRegex() + NUMBER_REGEX);
+        Matcher matcher = compile.matcher(input);
+
+        if (matcher.matches()){
+            String id = matcher.group("id");
+            try {
+                dataRepository.mark(Integer.parseInt(id),DONE);
+            } catch (TaskNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 }

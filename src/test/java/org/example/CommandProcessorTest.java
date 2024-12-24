@@ -1,6 +1,7 @@
 package org.example;
 
 
+import org.example.exception.TaskNotFoundException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +31,16 @@ public class CommandProcessorTest{
     @Test
     public void add(){
         String desc = "run forest run";
-        commandProcessor.process("task-cli add  \"%s\" ".formatted(desc));
+        commandProcessor.process("task-cli add \"%s\"".formatted(desc));
+
+        verify(dataRepository, times(1)).add(stringCaptor.capture());
+        assertThat(stringCaptor.getValue()).isEqualTo(desc);
+    }
+
+    @Test
+    public void add_withExtraSpace(){
+        String desc = "run forest run";
+        commandProcessor.process("task-cli  add \"%s\"     ".formatted(desc));
 
         verify(dataRepository, times(1)).add(stringCaptor.capture());
         assertThat(stringCaptor.getValue()).isEqualTo(desc);
@@ -66,25 +76,97 @@ public class CommandProcessorTest{
 
     @Test
     public void list(){
-        commandProcessor.process("task-cli  list");
+        commandProcessor.process("task-cli list");
+        verify(dataRepository,times(1)).findAll();
+    }
+
+    @Test
+    public void list_withExtraSpace(){
+        commandProcessor.process("task-cli      list     ");
         verify(dataRepository,times(1)).findAll();
     }
 
     @Test
     public void list_withTaskStatus(){
-        commandProcessor.process("task-cli  list  done");
+        commandProcessor.process("task-cli list done");
         verify(dataRepository,times(1)).findBy(DONE);
 
-        commandProcessor.process("task-cli  list  todo");
+        commandProcessor.process("task-cli list todo");
         verify(dataRepository,times(1)).findBy(TODO);
 
-        commandProcessor.process("task-cli  list  in-progress");
+        commandProcessor.process("task-cli list in-progress");
         verify(dataRepository,times(1)).findBy(IN_PROGRESS);
     }
 
     @Test
     public void list_withInvalidTaskStatus(){
-        commandProcessor.process("task-cli  list  invalid-status ");
+        commandProcessor.process("task-cli list invalid-status");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void list_wrongOrder(){
+        commandProcessor.process("task-cli todo list");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void markInProgress() throws TaskNotFoundException {
+        commandProcessor.process("task-cli mark-in-progress 1");
+        verify(dataRepository,times(1)).mark(1,IN_PROGRESS);
+    }
+
+    @Test
+    public void markInProgress_withExtraSpace() throws TaskNotFoundException {
+        commandProcessor.process("task-cli   mark-in-progress   1    ");
+        verify(dataRepository,times(1)).mark(1,IN_PROGRESS);
+    }
+
+    @Test
+    public void markInProgress_missingId() {
+        commandProcessor.process("task-cli mark-in-progress");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void markInProgress_wrongOrder() {
+        commandProcessor.process("task-cli 1123 mark-in-progress");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void markInProgress_idStartWithZero() {
+        commandProcessor.process("task-cli mark-in-progress 012334123");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void markDone() throws TaskNotFoundException {
+        commandProcessor.process("task-cli mark-done 1");
+        verify(dataRepository,times(1)).mark(1,DONE);
+    }
+
+    @Test
+    public void markDone_withExtraSpace() throws TaskNotFoundException {
+        commandProcessor.process("task-cli   mark-done   1    ");
+        verify(dataRepository,times(1)).mark(1,DONE);
+    }
+
+    @Test
+    public void markDone_missingId() {
+        commandProcessor.process("task-cli mark-done");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void markDone_wrongOrder() {
+        commandProcessor.process("task-cli 1123 mark-done");
+        verifyNoInteractions(dataRepository);
+    }
+
+    @Test
+    public void markDone_idStartWithZero() {
+        commandProcessor.process("task-cli mark-done 012334123");
         verifyNoInteractions(dataRepository);
     }
 }

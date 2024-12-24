@@ -2,6 +2,7 @@ package org.example;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.exception.TaskNotFoundException;
 import org.example.model.Data;
 
 import java.io.File;
@@ -25,8 +26,13 @@ public class DataRepository {
     public void findAll(){
         data.findAll().forEach(task -> System.out.println(task.toString()));
     }
+
     public void findBy(TaskStatus status){
         data.findTasksByStatus(status).forEach(task -> System.out.println(task.toString()));
+    }
+
+    public void mark(int id, TaskStatus status) throws TaskNotFoundException {
+        data.changeTaskStatus(id, status);
     }
 
     private Data open(){
